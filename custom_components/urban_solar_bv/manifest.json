@@ -1,0 +1,9 @@
+{
+  "domain": "Battery_ub_2",
+  "name": "Urban Solar Virtual Battery",
+  "codeowners": ["@HTModeLia"],
+  "config_flow": true,
+  "documentation": "https://github.com/HTModeLia/Battery_ub_2",
+  "iot_class": "local_polling",
+  "version": "1.0.0"
+}
