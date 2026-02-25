@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuration Urban Solar",
+        "data": {
+          "injection_entity": "Capteur Injection Totale (EAIT)",
+          "hchp_entity": "Capteur Heures Pleines (HCHP)",
+          "hchc_entity": "Capteur Heures Creuses (HCHC)",
+          "initial_battery_level": "Stock initial (kWh)",
+          "price_hp": "Prix kWh Heures Pleines (€)",
+          "price_hc": "Prix kWh Heures Creuses (€)",
+          "tax_hp": "Taxe déstockage HP (€)",
+          "tax_hc": "Taxe déstockage HC (€)"
+        }
+      }
+    }
+  }
+}
