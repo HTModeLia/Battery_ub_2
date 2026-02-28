@@ -2,14 +2,18 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configuration Urban Solar",
+        "title": "Configuration & Calibrage",
+        "description": "Entrez vos index Linky au jour du début de votre contrat Urban Solar pour réinitialiser le calcul.",
         "data": {
-          "injection_entity": "Capteur Injection Totale (EAIT)",
+          "injection_entity": "Capteur Injection (EAIT)",
           "hchp_entity": "Capteur Heures Pleines (HCHP)",
           "hchc_entity": "Capteur Heures Creuses (HCHC)",
-          "initial_battery_level": "Stock initial (kWh)",
-          "price_hp": "Prix kWh Heures Pleines (€)",
-          "price_hc": "Prix kWh Heures Creuses (€)",
+          "start_injection": "Index Injection de départ (Wh)",
+          "start_hchp": "Index HCHP de départ (Wh)",
+          "start_hchc": "Index HCHC de départ (Wh)",
+          "start_battery_kwh": "Solde batterie au départ (kWh)",
+          "price_hp": "Prix kWh Réseau HP (€)",
+          "price_hc": "Prix kWh Réseau HC (€)",
           "tax_hp": "Taxe déstockage HP (€)",
           "tax_hc": "Taxe déstockage HC (€)"
         }
