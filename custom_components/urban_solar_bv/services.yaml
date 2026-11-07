@@ -1,0 +1,26 @@
+calibrer:
+  name: Calibrer la batterie virtuelle
+  description: >-
+    Recale le stock sur le niveau relevé dans l'espace client Urban Solar.
+    L'injection et la consommation depuis la date du relevé sont rejouées depuis l'historique.
+  target:
+    entity:
+      integration: urban_solar_bv
+      domain: sensor
+  fields:
+    niveau:
+      name: Niveau relevé (kWh)
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 1000000
+          step: 0.001
+          mode: box
+          unit_of_measurement: kWh
+    date_releve:
+      name: Date et heure du relevé
+      description: >-
+        Vide = maintenant. Doit rester dans la durée de conservation du recorder (10 jours par défaut).
+      selector:
+        datetime:

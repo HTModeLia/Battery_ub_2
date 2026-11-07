@@ -3,7 +3,11 @@
   "name": "Urban Solar Virtual Battery",
   "codeowners": ["@HTModeLia"],
   "config_flow": true,
+  "dependencies": ["recorder"],
   "documentation": "https://github.com/HTModeLia/Battery_ub_2",
-  "iot_class": "local_polling",
-  "version": "1.2.0"
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/HTModeLia/Battery_ub_2/issues",
+  "requirements": [],
+  "version": "2.0.0"
 }

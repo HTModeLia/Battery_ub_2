@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Urban Solar virtual battery",
+        "description": "Pick your Linky meters and enter the battery level shown in your Urban Solar account, with the date and time of that reading. Consumption and injection since the reading are replayed from Home Assistant history.",
+        "data": {
+          "injection_entity": "Injection meter (EAIT)",
+          "hchp_entity": "Peak hours meter (HCHP)",
+          "hchc_entity": "Off-peak hours meter (HCHC)",
+          "releve_kwh": "Level read on Urban Solar (kWh)",
+          "releve_date": "Date and time of the reading",
+          "price_hp": "Grid price, peak hours (€/kWh)",
+          "price_hc": "Grid price, off-peak hours (€/kWh)",
+          "tax_hp": "Withdrawal tax, peak hours (€/kWh)",
+          "tax_hc": "Withdrawal tax, off-peak hours (€/kWh)"
+        }
+      }
+    },
+    "error": {
+      "date_future": "The reading date cannot be in the future."
+    },
+    "abort": {
+      "already_configured": "This virtual battery is already configured."
+    }
+  }
+}

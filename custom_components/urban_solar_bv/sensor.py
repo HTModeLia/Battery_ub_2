@@ -1,88 +1,74 @@
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
-from homeassistant.helpers.entity import DeviceInfo # <--- Ajouté
+import voluptuous as vol
+
+from homeassistant.components.sensor import SensorDeviceClass as DC, SensorEntity, SensorStateClass as SC
+from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.util import dt as dt_util
+
+from . import parse_local
 from .const import *
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-    config = config_entry.data
-    # On passe config_entry pour récupérer l'ID de l'appareil
-    async_add_entities([
-        UrbanSolarBatteryLevel(hass, config, config_entry),
-        UrbanSolarCurrentPrice(hass, config, config_entry),
-        UrbanSolarSavings(hass, config, config_entry)
-    ], True)
 
-class UrbanSolarBaseSensor(SensorEntity):
-    """Classe de base pour partager les infos de l'appareil"""
-    def __init__(self, hass, config, entry):
-        self.hass = hass
-        self._config = config
-        self._entry = entry
+def _independance(d, c):
+    total = d["decharge_hp"] + d["decharge_hc"] + d["reseau_hp"] + d["reseau_hc"]
+    return 100 * (d["decharge_hp"] + d["decharge_hc"]) / total if total else None
 
-    @property
-    def device_info(self) -> DeviceInfo:
-        """Définit l'appareil auquel l'entité appartient"""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._entry.entry_id)},
-            name="Gestionnaire Batterie Virtuelle",
+
+# shortcut: coût et économies appliquent les tarifs actuels à tout l'historique ; à historiser si les tarifs changent
+SENSORS = (
+    # (clé, nom, unité, device_class, state_class, valeur(data, config))
+    ("stock", "Stock batterie virtuelle", "kWh", DC.ENERGY_STORAGE, SC.MEASUREMENT, lambda d, c: d["stock"]),
+    ("charge", "Charge batterie virtuelle", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d, c: d["charge"]),
+    ("decharge", "Décharge batterie virtuelle", "kWh", DC.ENERGY, SC.TOTAL_INCREASING,
+     lambda d, c: d["decharge_hp"] + d["decharge_hc"]),
+    ("reseau_hp", "Import réseau HP", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d, c: d["reseau_hp"]),
+    ("reseau_hc", "Import réseau HC", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d, c: d["reseau_hc"]),
+    ("cout_destockage", "Coût déstockage", "EUR", DC.MONETARY, SC.TOTAL,
+     lambda d, c: d["decharge_hp"] * c[CONF_TAX_HP] + d["decharge_hc"] * c[CONF_TAX_HC]),
+    ("economies", "Économies batterie virtuelle", "EUR", DC.MONETARY, SC.TOTAL,
+     lambda d, c: d["decharge_hp"] * (c[CONF_PRICE_HP] - c[CONF_TAX_HP])
+     + d["decharge_hc"] * (c[CONF_PRICE_HC] - c[CONF_TAX_HC])),
+    ("independance", "Indépendance réseau", "%", None, SC.MEASUREMENT, _independance),
+)
+
+
+async def async_setup_entry(hass, entry, async_add_entities):
+    async_add_entities(UrbanSolarSensor(entry, *s) for s in SENSORS)
+    entity_platform.async_get_current_platform().async_register_entity_service(
+        "calibrer",
+        {vol.Required("niveau"): vol.Coerce(float), vol.Optional("date_releve"): cv.datetime},
+        "async_calibrer",
+    )
+
+
+class UrbanSolarSensor(SensorEntity):
+    _attr_should_poll = False
+
+    def __init__(self, entry, key, name, unit, device_class, state_class, value):
+        self._battery = entry.runtime_data
+        self._config = entry.data
+        self._value = value
+        self._attr_name = name
+        self._attr_unique_id = f"{entry.entry_id}_{key}"
+        self._attr_native_unit_of_measurement = unit
+        self._attr_device_class = device_class
+        self._attr_state_class = state_class
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name="Batterie virtuelle Urban Solar",
             manufacturer="Urban Solar",
-            model="Simulateur BV 1.2",
-            configuration_url="https://github.com/votre_pseudo/Battery_ub_2",
+            model="Batterie virtuelle",
+            configuration_url="https://github.com/HTModeLia/Battery_ub_2",
         )
 
-class UrbanSolarBatteryLevel(UrbanSolarBaseSensor):
-    def __init__(self, hass, config, entry):
-        super().__init__(hass, config, entry)
-        self._attr_name = "Niveau Batterie Virtuelle"
-        self._attr_unique_id = f"{entry.entry_id}_level"
-        self._attr_native_unit_of_measurement = "kWh"
-        self._attr_device_class = SensorDeviceClass.ENERGY
-        self._attr_state_class = SensorStateClass.TOTAL
+    async def async_added_to_hass(self):
+        self.async_on_remove(self._battery.add_listener(self.async_write_ha_state))
 
     @property
     def native_value(self):
-        curr_inj = self.hass.states.get(self._config[CONF_INJECTION_ENTITY])
-        curr_hp = self.hass.states.get(self._config[CONF_HCHP_ENTITY])
-        curr_hc = self.hass.states.get(self._config[CONF_HCHC_ENTITY])
-        if not (curr_inj and curr_hp and curr_hc): return None
-        try:
-            delta_inj = float(curr_inj.state) - self._config[CONF_START_INJECTION]
-            delta_hp = float(curr_hp.state) - self._config[CONF_START_HCHP]
-            delta_hc = float(curr_hc.state) - self._config[CONF_START_HCHC]
-            balance = (delta_inj - (delta_hp + delta_hc)) / 1000
-            return round(balance + self._config[CONF_START_BATTERY_KWH], 2)
-        except: return None
+        value = self._value(self._battery.data, self._config)
+        return None if value is None else round(value, 3)
 
-class UrbanSolarCurrentPrice(UrbanSolarBaseSensor):
-    def __init__(self, hass, config, entry):
-        super().__init__(hass, config, entry)
-        self._attr_name = "Prix kWh Actuel"
-        self._attr_unique_id = f"{entry.entry_id}_price"
-        self._attr_native_unit_of_measurement = "€/kWh"
-        self._attr_device_class = SensorDeviceClass.MONETARY
-
-    @property
-    def native_value(self):
-        # On cherche l'entité niveau de batterie de cet appareil
-        level = self.hass.states.get(f"sensor.niveau_batterie_virtuelle")
-        if not level or level.state in ["unknown", "unavailable"]: return self._config[CONF_PRICE_HP]
-        return self._config[CONF_TAX_HP] if float(level.state) > 0 else self._config[CONF_PRICE_HP]
-
-class UrbanSolarSavings(UrbanSolarBaseSensor):
-    def __init__(self, hass, config, entry):
-        super().__init__(hass, config, entry)
-        self._attr_name = "Économies Totales"
-        self._attr_unique_id = f"{entry.entry_id}_savings"
-        self._attr_native_unit_of_measurement = "€"
-        self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-
-    @property
-    def native_value(self):
-        curr_hp = self.hass.states.get(self._config[CONF_HCHP_ENTITY])
-        curr_hc = self.hass.states.get(self._config[CONF_HCHC_ENTITY])
-        if not (curr_hp and curr_hc): return None
-        delta_hp = (float(curr_hp.state) - self._config[CONF_START_HCHP]) / 1000
-        delta_hc = (float(curr_hc.state) - self._config[CONF_START_HCHC]) / 1000
-        savings = (delta_hp * (self._config[CONF_PRICE_HP] - self._config[CONF_TAX_HP])) + \
-                  (delta_hc * (self._config[CONF_PRICE_HC] - self._config[CONF_TAX_HC]))
-        return round(max(0, savings), 2)
+    async def async_calibrer(self, niveau, date_releve=None):
+        when = parse_local(date_releve) if date_releve else dt_util.utcnow()
+        await self._battery.async_calibrate(niveau, when)

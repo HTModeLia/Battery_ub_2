@@ -1,0 +1,27 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Batterie virtuelle Urban Solar",
+        "description": "Choisissez vos compteurs Linky et indiquez le niveau de batterie relevé dans votre espace client Urban Solar, avec la date et l'heure du relevé. La consommation et l'injection depuis ce relevé sont reprises depuis l'historique de Home Assistant.",
+        "data": {
+          "injection_entity": "Compteur d'injection (EAIT)",
+          "hchp_entity": "Compteur Heures Pleines (HCHP)",
+          "hchc_entity": "Compteur Heures Creuses (HCHC)",
+          "releve_kwh": "Niveau relevé chez Urban Solar (kWh)",
+          "releve_date": "Date et heure du relevé",
+          "price_hp": "Prix du kWh réseau HP (€)",
+          "price_hc": "Prix du kWh réseau HC (€)",
+          "tax_hp": "Taxe de déstockage HP (€/kWh)",
+          "tax_hc": "Taxe de déstockage HC (€/kWh)"
+        }
+      }
+    },
+    "error": {
+      "date_future": "La date du relevé ne peut pas être dans le futur."
+    },
+    "abort": {
+      "already_configured": "Cette batterie virtuelle est déjà configurée."
+    }
+  }
+}
