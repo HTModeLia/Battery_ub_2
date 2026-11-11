@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560" font-family="Roboto, Segoe UI, Arial, sans-serif">
+  <title>Exemple : batterie virtuelle Urban Solar dans le tableau Énergie de Home Assistant</title>
+  <rect width="960" height="560" fill="#f3f4f6"/>
+  <text x="24" y="38" font-size="20" font-weight="500" fill="#212121">Énergie — exemple sur une journée</text>
+  <text x="24" y="60" font-size="13" fill="#6b7280">Valeurs fictives : 18 kWh produits, 14 kWh consommés, toute l'injection part dans la batterie virtuelle</text>
+
+  <!-- Carte : distribution d'énergie -->
+  <rect x="24" y="80" width="520" height="456" rx="12" fill="#fff" stroke="#e5e7eb"/>
+  <text x="44" y="112" font-size="16" font-weight="500" fill="#212121">Distribution d'énergie</text>
+
+  <g fill="none" stroke-width="3" stroke-linecap="round">
+    <!-- solaire -> maison -->
+    <path d="M318 210 Q330 300 404 312" stroke="#ff9800"/>
+    <!-- solaire -> batterie -->
+    <path d="M284 212 L284 400" stroke="#ff9800" stroke-dasharray="2 7"/>
+    <!-- batterie -> maison -->
+    <path d="M318 430 Q330 340 404 330" stroke="#f06292"/>
+    <!-- réseau -> maison -->
+    <path d="M200 320 L404 320" stroke="#488fc2"/>
+  </g>
+  <g font-size="12" font-weight="500">
+    <text x="352" y="262" fill="#e68900">6 kWh</text>
+    <text x="292" y="306" fill="#e68900">12 kWh</text>
+    <text x="352" y="398" fill="#d81b60">7 kWh</text>
+    <text x="222" y="312" fill="#3b7bb0">1 kWh</text>
+  </g>
+
+  <!-- Solaire -->
+  <circle cx="284" cy="172" r="40" fill="#fff" stroke="#ff9800" stroke-width="3"/>
+  <text x="284" y="168" font-size="15" font-weight="500" fill="#212121" text-anchor="middle">18 kWh</text>
+  <text x="284" y="186" font-size="11" fill="#6b7280" text-anchor="middle">☀ produits</text>
+  <text x="284" y="124" font-size="13" fill="#212121" text-anchor="middle">Solaire</text>
+
+  <!-- Réseau -->
+  <circle cx="156" cy="320" r="40" fill="#fff" stroke="#488fc2" stroke-width="3"/>
+  <text x="156" y="316" font-size="15" font-weight="500" fill="#212121" text-anchor="middle">→ 1 kWh</text>
+  <text x="156" y="334" font-size="11" fill="#6b7280" text-anchor="middle">← 0 kWh</text>
+  <text x="156" y="378" font-size="13" fill="#212121" text-anchor="middle">Réseau</text>
+  <text x="156" y="394" font-size="11" fill="#6b7280" text-anchor="middle">import net HC</text>
+
+  <!-- Maison -->
+  <circle cx="446" cy="320" r="40" fill="#fff" stroke="#9e9e9e" stroke-width="3"/>
+  <text x="446" y="316" font-size="15" font-weight="500" fill="#212121" text-anchor="middle">14 kWh</text>
+  <text x="446" y="334" font-size="11" fill="#6b7280" text-anchor="middle">consommés</text>
+  <text x="446" y="378" font-size="13" fill="#212121" text-anchor="middle">Maison</text>
+
+  <!-- Batterie -->
+  <circle cx="284" cy="440" r="40" fill="#fff" stroke="#f06292" stroke-width="3"/>
+  <text x="284" y="436" font-size="15" font-weight="500" fill="#212121" text-anchor="middle">↓ 12 kWh</text>
+  <text x="284" y="454" font-size="11" fill="#6b7280" text-anchor="middle">↑ 7 kWh</text>
+  <text x="284" y="500" font-size="13" fill="#212121" text-anchor="middle">Batterie virtuelle</text>
+  <text x="284" y="516" font-size="11" fill="#6b7280" text-anchor="middle">stock : 812,5 → 817,5 kWh</text>
+
+  <!-- Jauge autosuffisance -->
+  <rect x="564" y="80" width="372" height="148" rx="12" fill="#fff" stroke="#e5e7eb"/>
+  <text x="584" y="112" font-size="16" font-weight="500" fill="#212121">Autosuffisance</text>
+  <path d="M640 200 A60 60 0 0 1 760 200" fill="none" stroke="#e5e7eb" stroke-width="14"/>
+  <!-- 93 % de l'arc -->
+  <path d="M640 200 A60 60 0 0 1 758.6 187.5" fill="none" stroke="#43a047" stroke-width="14"/>
+  <text x="700" y="196" font-size="22" font-weight="500" fill="#212121" text-anchor="middle">93 %</text>
+  <text x="790" y="160" font-size="12" fill="#6b7280">13 kWh sur 14</text>
+  <text x="790" y="178" font-size="12" fill="#6b7280">hors réseau</text>
+
+  <!-- Configuration -->
+  <rect x="564" y="244" width="372" height="292" rx="12" fill="#fff" stroke="#e5e7eb"/>
+  <text x="584" y="276" font-size="16" font-weight="500" fill="#212121">Configuration Énergie</text>
+  <g font-size="12">
+    <rect x="584" y="292" width="4" height="58" fill="#488fc2"/>
+    <text x="598" y="306" font-weight="500" fill="#212121">Consommation réseau</text>
+    <text x="598" y="324" fill="#374151" font-family="Consolas, monospace">sensor.import_reseau_hp</text>
+    <text x="598" y="342" fill="#374151" font-family="Consolas, monospace">sensor.import_reseau_hc</text>
+
+    <rect x="584" y="362" width="4" height="22" fill="#9e9e9e"/>
+    <text x="598" y="378" font-weight="500" fill="#212121">Retour au réseau : <tspan font-weight="400" fill="#6b7280">aucun</tspan></text>
+
+    <rect x="584" y="396" width="4" height="40" fill="#ff9800"/>
+    <text x="598" y="410" font-weight="500" fill="#212121">Production solaire</text>
+    <text x="598" y="428" fill="#374151" font-family="Consolas, monospace">sensor.envoy_production (Enphase)</text>
+
+    <rect x="584" y="448" width="4" height="58" fill="#f06292"/>
+    <text x="598" y="462" font-weight="500" fill="#212121">Stockage sur batterie</text>
+    <text x="598" y="480" fill="#374151"><tspan font-family="Consolas, monospace">sensor.charge_batterie_virtuelle</tspan> ↓</text>
+    <text x="598" y="498" fill="#374151"><tspan font-family="Consolas, monospace">sensor.decharge_batterie_virtuelle</tspan> ↑</text>
+  </g>
+  <text x="584" y="524" font-size="11" fill="#6b7280">Ne déclarez pas les index Linky bruts.</text>
+</svg>

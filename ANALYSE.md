@@ -12,8 +12,9 @@
 | Calibrage | **Ajouté** : niveau relevé chez Urban Solar à une date/heure, à l'installation et via l'action `urban_solar_bv.calibrer`. L'historique depuis le relevé est rejoué. |
 | Indépendance énergétique | **Ajouté** : jauge *Autosuffisance* du tableau Énergie et capteur `sensor.independance_reseau`. |
 | 3.4 Défauts techniques | **Corrigés** : config flow, classes et unités, gestion de `unavailable`, Wh/kWh, `async_unload_platforms`, manifeste, traductions (`translations/`), README. |
-| Options flow (modifier les tarifs) | **Non fait** : supprimer puis réajouter l'intégration pour changer les tarifs. |
-| Tarifs historisés | **Non fait** : coût et économies appliquent les tarifs actuels à tout l'historique. |
+| Options flow (modifier les tarifs) | **Corrigé en 2.1.0** : bouton *Configurer* de l'intégration. |
+| Tarifs historisés | **Corrigé en 2.1.0** : coût et économies sont cumulés au tarif en vigueur à chaque décharge. |
+| Redémarrage avec un index jamais lu | **Corrigé en 2.1.0** : l'intégration refusait de démarrer ; l'index prend désormais sa première valeur comme référence. |
 | Règles Urban Solar (plafond, expiration du stock) | **Non vérifiées** : la batterie est supposée illimitée et sans expiration. |
 
 **Calibrage :** la date du relevé doit rester dans la durée de conservation du recorder (10 jours par défaut).

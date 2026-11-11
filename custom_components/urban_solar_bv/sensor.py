@@ -9,25 +9,23 @@ from . import parse_local
 from .const import *
 
 
-def _independance(d, c):
+def _independance(d):
     total = d["decharge_hp"] + d["decharge_hc"] + d["reseau_hp"] + d["reseau_hc"]
     return 100 * (d["decharge_hp"] + d["decharge_hc"]) / total if total else None
 
 
-# shortcut: coût et économies appliquent les tarifs actuels à tout l'historique ; à historiser si les tarifs changent
 SENSORS = (
-    # (clé, nom, unité, device_class, state_class, valeur(data, config))
-    ("stock", "Stock batterie virtuelle", "kWh", DC.ENERGY_STORAGE, SC.MEASUREMENT, lambda d, c: d["stock"]),
-    ("charge", "Charge batterie virtuelle", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d, c: d["charge"]),
+    # (clé, nom, unité, device_class, state_class, valeur(data))
+    ("stock", "Stock batterie virtuelle", "kWh", DC.ENERGY_STORAGE, SC.MEASUREMENT, lambda d: d["stock"]),
+    ("charge", "Charge batterie virtuelle", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d: d["charge"]),
     ("decharge", "Décharge batterie virtuelle", "kWh", DC.ENERGY, SC.TOTAL_INCREASING,
-     lambda d, c: d["decharge_hp"] + d["decharge_hc"]),
-    ("reseau_hp", "Import réseau HP", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d, c: d["reseau_hp"]),
-    ("reseau_hc", "Import réseau HC", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d, c: d["reseau_hc"]),
+     lambda d: d["decharge_hp"] + d["decharge_hc"]),
+    ("reseau_hp", "Import réseau HP", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d: d["reseau_hp"]),
+    ("reseau_hc", "Import réseau HC", "kWh", DC.ENERGY, SC.TOTAL_INCREASING, lambda d: d["reseau_hc"]),
     ("cout_destockage", "Coût déstockage", "EUR", DC.MONETARY, SC.TOTAL,
-     lambda d, c: d["decharge_hp"] * c[CONF_TAX_HP] + d["decharge_hc"] * c[CONF_TAX_HC]),
+     lambda d: d["cout"]),
     ("economies", "Économies batterie virtuelle", "EUR", DC.MONETARY, SC.TOTAL,
-     lambda d, c: d["decharge_hp"] * (c[CONF_PRICE_HP] - c[CONF_TAX_HP])
-     + d["decharge_hc"] * (c[CONF_PRICE_HC] - c[CONF_TAX_HC])),
+     lambda d: d["economies"]),
     ("independance", "Indépendance réseau", "%", None, SC.MEASUREMENT, _independance),
 )
 
@@ -46,7 +44,6 @@ class UrbanSolarSensor(SensorEntity):
 
     def __init__(self, entry, key, name, unit, device_class, state_class, value):
         self._battery = entry.runtime_data
-        self._config = entry.data
         self._value = value
         self._attr_name = name
         self._attr_unique_id = f"{entry.entry_id}_{key}"
@@ -66,7 +63,7 @@ class UrbanSolarSensor(SensorEntity):
 
     @property
     def native_value(self):
-        value = self._value(self._battery.data, self._config)
+        value = self._value(self._battery.data)
         return None if value is None else round(value, 3)
 
     async def async_calibrer(self, niveau, date_releve=None):

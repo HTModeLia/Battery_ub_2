@@ -3,6 +3,7 @@
 Compteurs : "inj" (injection), "hp" et "hc" (soutirage), en kWh.
 Capacité infinie : tout le surplus injecté remplit la batterie.
 Le soutirage est servi d'abord par la batterie, le reste par le réseau.
+data["tarifs"] = {"hp": (prix, taxe), "hc": (prix, taxe)} en €/kWh, fixé par l'intégration.
 """
 
 COUNTERS = ("inj", "hp", "hc")
@@ -16,6 +17,8 @@ def new_data(stock):
         "decharge_hc": 0.0,
         "reseau_hp": 0.0,
         "reseau_hc": 0.0,
+        "cout": 0.0,
+        "economies": 0.0,
         "last": {},
     }
 
@@ -37,6 +40,10 @@ def apply(data, key, value, count=True):
     if count:
         data[f"decharge_{key}"] += covered
         data[f"reseau_{key}"] += delta - covered
+        # Tarifs en vigueur au moment de la décharge : un changement de tarif ne réécrit pas le passé
+        price, tax = data.get("tarifs", {}).get(key, (0, 0))
+        data["cout"] += covered * tax
+        data["economies"] += covered * (price - tax)
 
 
 def replay(data, stock, base, events, count):

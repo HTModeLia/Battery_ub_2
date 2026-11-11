@@ -20,6 +20,8 @@ async def async_setup_entry(hass, entry):
     battery = VirtualBattery(hass, entry)
     await battery.async_start()
     entry.runtime_data = battery
+    # Les tarifs modifiés via « Configurer » s'appliquent au rechargement
+    entry.async_on_unload(entry.add_update_listener(lambda h, e: h.config_entries.async_reload(e.entry_id)))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -68,13 +70,24 @@ class VirtualBattery:
 
     async def async_start(self):
         saved = await self._store.async_load()
+        conf = {**self._entry.data, **self._entry.options}
+        tarifs = {
+            "hp": (conf[CONF_PRICE_HP], conf[CONF_TAX_HP]),
+            "hc": (conf[CONF_PRICE_HC], conf[CONF_TAX_HC]),
+        }
         if saved:
             self.data = saved
+            # Données de la 2.0.0 : coût et économies n'étaient pas cumulés
+            if "cout" not in saved:
+                saved["cout"] = sum(saved[f"decharge_{k}"] * tax for k, (_, tax) in tarifs.items())
+                saved["economies"] = sum(saved[f"decharge_{k}"] * (p - tax) for k, (p, tax) in tarifs.items())
+            saved["tarifs"] = tarifs
             # Rattrape ce qui s'est passé pendant l'arrêt de HA
             await self._replay(saved["stock"], dt_util.parse_datetime(saved["updated"]), saved["last"], count=True)
         else:
             releve = self._entry.data[CONF_RELEVE_KWH]
             self.data = engine.new_data(releve)
+            self.data["tarifs"] = tarifs
             try:
                 await self.async_calibrate(releve, parse_local(self._entry.data[CONF_RELEVE_DATE]))
             except HomeAssistantError as err:
@@ -108,6 +121,7 @@ class VirtualBattery:
                 significant_changes_only=False,
             )
         )
+        calibrating = base is None
         base = dict(base or {})
         events = []
         for key, eid in self.entities.items():
@@ -115,12 +129,13 @@ class VirtualBattery:
                 value = self._kwh(state)
                 if value is None:
                     continue
-                if key in base:
+                # Au redémarrage, un index jamais lu prend sa 1re valeur comme référence (voir engine.apply)
+                if key in base or not calibrating:
                     events.append((state.last_updated, key, value))
                 elif state.last_updated <= since + timedelta(seconds=1):  # état au début de la période
                     base[key] = value
         missing = [eid for key, eid in self.entities.items() if key not in base]
-        if missing:
+        if calibrating and missing:
             raise HomeAssistantError(
                 f"Pas d'historique de {', '.join(missing)} au {dt_util.as_local(since):%d/%m/%Y %H:%M} "
                 "(date antérieure à la conservation du recorder ?)"

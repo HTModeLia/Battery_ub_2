@@ -23,5 +23,19 @@
     "abort": {
       "already_configured": "This virtual battery is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Prices",
+        "description": "New prices apply to energy withdrawn from now on. Cost and savings already accumulated are kept.",
+        "data": {
+          "price_hp": "Grid price, peak hours (€/kWh)",
+          "price_hc": "Grid price, off-peak hours (€/kWh)",
+          "tax_hp": "Withdrawal tax, peak hours (€/kWh)",
+          "tax_hc": "Withdrawal tax, off-peak hours (€/kWh)"
+        }
+      }
+    }
   }
 }

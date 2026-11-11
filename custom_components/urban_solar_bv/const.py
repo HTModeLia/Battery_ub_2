@@ -13,3 +13,4 @@ CONF_PRICE_HP = "price_hp"
 CONF_PRICE_HC = "price_hc"
 CONF_TAX_HP = "tax_hp"
 CONF_TAX_HC = "tax_hc"
+TARIFS = (CONF_PRICE_HP, CONF_PRICE_HC, CONF_TAX_HP, CONF_TAX_HC)

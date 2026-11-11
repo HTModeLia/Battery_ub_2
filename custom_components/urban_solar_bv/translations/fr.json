@@ -23,5 +23,19 @@
     "abort": {
       "already_configured": "Cette batterie virtuelle est déjà configurée."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Tarifs",
+        "description": "Les nouveaux tarifs s'appliquent à l'énergie déstockée à partir de maintenant. Le coût et les économies déjà cumulés ne changent pas.",
+        "data": {
+          "price_hp": "Prix du kWh réseau HP (€)",
+          "price_hc": "Prix du kWh réseau HC (€)",
+          "tax_hp": "Taxe de déstockage HP (€/kWh)",
+          "tax_hc": "Taxe de déstockage HC (€/kWh)"
+        }
+      }
+    }
   }
 }

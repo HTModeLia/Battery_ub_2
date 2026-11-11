@@ -6,6 +6,8 @@ Intégration Home Assistant qui simule la **batterie virtuelle Urban Solar** à 
 - La consommation est servie **d'abord par la batterie**, puis par le réseau quand la batterie est vide.
 - Le stock se **recale** sur le niveau affiché dans l'espace client Urban Solar, à la date et l'heure du relevé.
 
+![Exemple de tableau Énergie avec la batterie virtuelle](docs/tableau-energie.svg)
+
 ## Entités
 
 | Entité | Rôle |
@@ -46,6 +48,10 @@ data:
 ```
 
 Le stock repart du niveau indiqué à cette date, puis l'injection et la consommation enregistrées depuis sont rejouées. Les cumuls (charge, décharge, import réseau) ne sont pas modifiés.
+
+## Modifier les tarifs
+
+**Paramètres > Appareils et services > Urban Solar Virtual Battery > Configurer**. Les nouveaux tarifs s'appliquent à l'énergie déstockée à partir de ce moment : le coût et les économies déjà cumulés ne sont pas recalculés.
 
 ## Tableau de bord Énergie
 

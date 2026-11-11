@@ -51,6 +51,18 @@ def test_recalibrage_ne_touche_que_le_stock():
     assert d["stock"] == 2 and d["charge"] == 42 and d["reseau_hp"] == 0
 
 
+def test_changement_de_tarif_ne_reecrit_pas_le_passe():
+    d = engine.new_data(10)
+    d["last"] = {"hp": 0.0, "hc": 0.0}
+    d["tarifs"] = {"hp": (0.25, 0.05), "hc": (0.20, 0.04)}
+    engine.apply(d, "hp", 4.0)   # 4 kWh déstockés : taxe 0,20 €, gain 0,80 €
+    d["tarifs"]["hp"] = (0.30, 0.10)
+    engine.apply(d, "hp", 6.0)   # 2 kWh : taxe 0,20 €, gain 0,40 €
+    engine.apply(d, "hc", 10.0)  # 4 kWh restants en batterie, 6 au réseau : taxe 0,16 €, gain 0,64 €
+    assert round(d["cout"], 6) == 0.56 and round(d["economies"], 6) == 1.84
+    assert d["reseau_hc"] == 6
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):
